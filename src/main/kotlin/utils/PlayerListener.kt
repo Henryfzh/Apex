@@ -29,6 +29,7 @@ suspend fun playerStatListener(): TimerTask? {
         }
         cache.writeText(firstRes.global.rank.rankScore) //将首次获取到的分数写入缓存文件
     }
+    delay(2000)
     val playerTask : TimerTask = object :TimerTask() { //定时任务
         override fun run() {
             listendPlayer.data.forEach { it_id -> //遍历玩家id

@@ -43,7 +43,7 @@ suspend fun playerStatListener(): Job {
                                 playerPicturMode(res, it_id.key, image)
                                 it_id.value.forEach { it_group -> //遍历玩家id对应的群号
                                     Bot.instances.forEach { //遍历bot实例发送消息
-                                        it.getGroup(it_group!!)?.sendMessage("${it_id.key}的分数已更新：${cache.readText()} --> ${res.global.rank.rankScore}")
+                                        it.getGroup(it_group!!)?.sendMessage("${it_id.key}的分数已更新!\n${cache.readText()} --> ${res.global.rank.rankScore}")
                                         it.getGroup(it_group)?.sendImage(image.get())
                                     }
                                 }
@@ -52,7 +52,7 @@ suspend fun playerStatListener(): Job {
                                 cache.writeText(res.global.rank.rankScore)
                                 it_id.value.forEach { it_group -> //遍历玩家id对应的群号
                                     Bot.instances.forEach { //遍历bot实例发送消息
-                                        it.getGroup(it_group!!)?.sendMessage("${it_id.key}的分数已更新：${cache.readText()} --> ${res.global.rank.rankScore}")
+                                        it.getGroup(it_group!!)?.sendMessage("${it_id.key}的分数已更新!\n${cache.readText()} --> ${res.global.rank.rankScore}")
                                         it.getGroup(it_group)?.sendMessage(playerTextMode(res, it_id.key))
                                     }
                                 }

@@ -48,6 +48,7 @@ fun mapReminder() :TimerTask{
                             if (it == 0.toLong()) return@forEach //跳过文件中的占位符
                             if (Config.mode == "pic") { //图片模式
                                     val image = ApexImage()
+                                    res = Gson().fromJson(URL(url).readText(), ApexResponseMap::class.java)
                                     mapPictureMode(res, image)
                                     Bot.instances.forEach { bot ->
                                         bot.getGroup(it!!)?.sendMessage("大逃杀地图已轮换")

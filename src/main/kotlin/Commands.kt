@@ -189,8 +189,8 @@ object Listener : CompositeCommand(
             listendPlayer.data[id] = arrayListOf(subject?.id)
         }
         File("$dataFolder/Data.json").writeText(gson.toJson(listendPlayer))
-        logger.info("监听添加成功\nOrigin ID${id}\n群号：${subject?.id}")
-        subject?.sendMessage("添加对${id}:${subject?.id}的监听成功")
+        logger.info("添加对${id}:${subject?.id}的监听成功")
+        subject?.sendMessage("监听添加成功：\nOrigin ID：${id}\n群号：${subject?.id}")
         if(Config.listener) {
             playerJob?.cancel()
             playerJob = playerStatListener()

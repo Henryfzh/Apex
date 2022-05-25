@@ -192,8 +192,9 @@ object Listener : CompositeCommand(
         logger.info("添加对${id}:${subject?.id}的监听成功")
         subject?.sendMessage("监听添加成功：\nOrigin ID：${id}\n群号：${subject?.id}")
         if(Config.listener) {
-            playerJob?.cancel()
-            playerJob = playerStatListener()
+            logger.info("重启监听线程")
+            playerTask?.cancel()
+            playerTask = playerStatListener()
         }
     }
 
@@ -209,9 +210,10 @@ object Listener : CompositeCommand(
             groups.data.add(subject?.id)
         }
         File("$dataFolder/Reminder.json").writeText(gson.toJson(groups))
-        logger.info("已添加对${subject?.id}的地图轮换提醒")
-        subject?.sendMessage("已添加对${subject?.id}的地图轮换提醒")
+        logger.info("已添加对[${subject?.id}]的地图轮换提醒")
+        subject?.sendMessage("已添加对[${subject?.id}]的地图轮换提醒")
         if(Config.mapRotationReminder) {
+            logger.info("重启监听线程")
             mapTask?.cancel()
             mapTask = mapReminder()
         }
@@ -232,16 +234,17 @@ object ListenerRemove : CompositeCommand(
                 listendPlayer.data.remove(id)
             }
             File("$dataFolder/Data.json").writeText(gson.toJson(listendPlayer))
-            subject?.sendMessage("已取消对${id}:${subject?.id}的监听")
-            logger.info("已取消对${id}:${subject?.id}的监听")
+            subject?.sendMessage("已取消对${id}[${subject?.id}]的监听")
+            logger.info("已取消对${id}[${subject?.id}]的监听")
             if(Config.listener) {
-                playerJob?.cancel()
-                playerJob = playerStatListener()
+                logger.info("重启监听线程")
+                playerTask?.cancel()
+                playerTask = playerStatListener()
             }
         }
         else {
-            subject?.sendMessage("${id}:${subject?.id}不在监听列表")
-            logger.error("${id}:${subject?.id}不在监听列表")
+            subject?.sendMessage("${id}[${subject?.id}]不在监听列表")
+            logger.error("${id}[${subject?.id}]不在监听列表")
         }
 
     }
@@ -256,6 +259,7 @@ object ListenerRemove : CompositeCommand(
             subject?.sendMessage("已取消该群提醒")
             logger.info("已取消该群提醒")
             if(Config.mapRotationReminder) {
+                logger.info("重启监听线程")
                 mapTask?.cancel()
                 mapTask = mapReminder()
             }

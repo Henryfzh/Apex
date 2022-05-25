@@ -17,10 +17,11 @@ import net.mamoe.mirai.console.command.*
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import java.io.File
+import java.util.Timer
 import java.util.TimerTask
 
-var mapTask:TimerTask? = null
-var playerJob: Job? = null
+var mapTask: TimerTask? = null
+var playerTask: TimerTask? = null
 object RankLookUp : KotlinPlugin(
     JvmPluginDescription(
         id = "pers.shennoter.RankLookUp",
@@ -71,7 +72,7 @@ object RankLookUp : KotlinPlugin(
         GlobalScope.launch { //启动监听任务
             val listendPlayer : ListendPlayer = Gson().fromJson(File("$dataFolder/Data.json").readText(), ListendPlayer::class.java)
             if(Config.listener && listendPlayer.data.size > 1) {
-                playerJob = playerStatListener()
+                playerTask = playerStatListener()
             }
             val groups : GroupReminding = Gson().fromJson(File("${RankLookUp.dataFolder}/Reminder.json").readText(), GroupReminding::class.java)
             if(Config.mapRotationReminder && groups.data.size > 1){

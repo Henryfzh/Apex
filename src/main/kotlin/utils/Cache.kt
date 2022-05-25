@@ -5,10 +5,19 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
+fun removeCache(isAuto: Boolean):String{
+    val imgs = File("$dataFolder/imgs")
+    val score = File("$dataFolder/score")
+    var info = removeFileByTime(isAuto,imgs)
+    info = removeFileByTime(isAuto,score)
+    return info
+}
+
+
 //删除缓存文件
-fun removeFileByTime(isAuto: Boolean) :String{
+fun removeFileByTime(isAuto: Boolean,folder:File) :String{
     //获取目录下所有文件
-    val allFile = getDirAllFile(File("$dataFolder/imgs"))
+    val allFile = getDirAllFile(folder)
     val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
     //获取当前时间
     var end: Date

@@ -153,7 +153,7 @@ object Cache : SimpleCommand(
 ) {
     @Handler
     suspend fun CommandSender.apexDelCache() {
-        val result = removeFileByTime(false)
+        val result = removeCache(true)
         RankLookUp.logger.info(result)
         subject?.sendMessage(result)
     }

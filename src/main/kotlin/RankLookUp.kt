@@ -66,7 +66,7 @@ object RankLookUp : KotlinPlugin(
             logger.error("未找到ApiKey，请到 https://apexlegendsapi.com/ 获取ApiKey填入 ./config/pers.shennoter.RankLookUp/config.yml 中并重启mirai-console")
         }
         if(Config.cacheAutoDel == "true"){
-            RankLookUp.logger.info(removeFileByTime(true))
+            RankLookUp.logger.info(removeCache(true))
         }
         GlobalScope.launch { //启动监听任务
             val listendPlayer : ListendPlayer = Gson().fromJson(File("$dataFolder/Data.json").readText(), ListendPlayer::class.java)

@@ -20,7 +20,7 @@ object Config : AutoSavePluginConfig("config") {
     @ValueDescription("玩家分数监听：true为启用，false为关闭")
     var listener: Boolean by value(false)
     @ValueDescription("监听时间间隔（单位：分钟）")
-    var listenInterval: Int by value(15)
+    var listenInterval: Int by value(10)
     @ValueDescription("地图轮换提醒：true为启用，false为关闭")
     var mapRotationReminder: Boolean by value(false)
     @ValueDescription("字体")

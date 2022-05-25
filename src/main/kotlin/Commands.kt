@@ -171,6 +171,7 @@ object Listener : CompositeCommand(
         catch(e:Exception){
             subject?.sendMessage("玩家ID不存在")
             logger.error("玩家ID不存在")
+            return
         }
         val gson = Gson()
         val listendPlayer : ListendPlayer = gson.fromJson(File("$dataFolder/Data.json").readText(), ListendPlayer::class.java)
@@ -189,8 +190,10 @@ object Listener : CompositeCommand(
         File("$dataFolder/Data.json").writeText(gson.toJson(listendPlayer))
         logger.info("添加对${id}:${subject?.id}的监听成功")
         subject?.sendMessage("添加对${id}:${subject?.id}的监听成功")
-        playerJob?.cancel()
-        playerJob = playerStatListener()
+        if(Config.listener) {
+            playerJob?.cancel()
+            playerJob = playerStatListener()
+        }
     }
 
     @SubCommand
@@ -207,8 +210,10 @@ object Listener : CompositeCommand(
         File("$dataFolder/Reminder.json").writeText(gson.toJson(groups))
         logger.info("已添加对${subject?.id}的地图轮换提醒")
         subject?.sendMessage("已添加对${subject?.id}的地图轮换提醒")
-        mapTask?.cancel()
-        mapTask = mapReminder()
+        if(Config.mapRotationReminder) {
+            mapTask?.cancel()
+            mapTask = mapReminder()
+        }
     }
 }
 
@@ -225,8 +230,10 @@ object ListenerRemove : CompositeCommand(
             File("$dataFolder/Data.json").writeText(gson.toJson(listendPlayer))
             subject?.sendMessage("已取消对${id}:${subject?.id}的监听")
             logger.info("已取消对${id}:${subject?.id}的监听")
-            playerJob?.cancel()
-            playerJob = playerStatListener()
+            if(Config.listener) {
+                playerJob?.cancel()
+                playerJob = playerStatListener()
+            }
         }
         else {
             subject?.sendMessage("${id}:${subject?.id}不在监听列表")
@@ -244,8 +251,10 @@ object ListenerRemove : CompositeCommand(
             File("$dataFolder/Reminder.json").writeText(gson.toJson(groups))
             subject?.sendMessage("已取消该群提醒")
             logger.info("已取消该群提醒")
-            mapTask?.cancel()
-            mapTask = mapReminder()
+            if(Config.mapRotationReminder) {
+                mapTask?.cancel()
+                mapTask = mapReminder()
+            }
         }
         else{
             subject?.sendMessage("该群不在提醒列表")

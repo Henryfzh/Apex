@@ -68,7 +68,7 @@ object RankLookUp : KotlinPlugin(
         if(Config.cacheAutoDel == "true"){
             RankLookUp.logger.info(removeFileByTime(true))
         }
-        GlobalScope.launch {
+        GlobalScope.launch { //启动监听任务
             val listendPlayer : ListendPlayer = Gson().fromJson(File("$dataFolder/Data.json").readText(), ListendPlayer::class.java)
             if(Config.listener && listendPlayer.data.size > 1) {
                 playerJob = playerStatListener()

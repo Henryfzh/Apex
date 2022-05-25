@@ -160,7 +160,8 @@ object Cache : SimpleCommand(
 }
 
 object Listener : CompositeCommand(
-    RankLookUp, "apexadd", description = "添加监听",
+    RankLookUp, "apexadd",
+    description = "添加监听",
 ) {
     @SubCommand
     suspend fun CommandSender.id(id: String) {
@@ -218,15 +219,18 @@ object Listener : CompositeCommand(
 }
 
 object ListenerRemove : CompositeCommand(
-    RankLookUp, "apexremove","移除id" ,
-    description = "取消对某玩家的监听"
+    RankLookUp, "apexremove",
+    description = "取消监听"
 ) {
     @SubCommand
     suspend fun CommandSender.id(id: String) {
         val gson = Gson()
         val listendPlayer : ListendPlayer = gson.fromJson(File("$dataFolder/Data.json").readText(), ListendPlayer::class.java)
         if(listendPlayer.data.contains(id) && listendPlayer.data[id]?.contains(subject?.id) == true) {
-            listendPlayer.data[id]?.remove(subject?.id)
+            listendPlayer.data[id]?.remove(subject?.id) //删除id对应群号
+            if(listendPlayer.data[id].isNullOrEmpty()){ //若id对应的所有群号都被删除，则删除此id
+                listendPlayer.data.remove(id)
+            }
             File("$dataFolder/Data.json").writeText(gson.toJson(listendPlayer))
             subject?.sendMessage("已取消对${id}:${subject?.id}的监听")
             logger.info("已取消对${id}:${subject?.id}的监听")

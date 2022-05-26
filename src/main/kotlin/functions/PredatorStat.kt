@@ -6,12 +6,23 @@ import java.awt.image.BufferedImage
 
 
 fun predatorStat(image: ApexImage):String?{
-    if(Config.ApiKey == "") {
+    if(Config.apiKey == "") {
         return "未填写ApiKey"
     }
-    val url = "https://api.mozambiquehe.re/predator?auth=${Config.ApiKey}"
-    val requestStr = getRes(url)
+    var url = "https://api.mozambiquehe.re/predator?auth=${Config.apiKey}"
+    var requestStr = getRes(url)
     if (requestStr.first == 1) {
+        if(Config.extendApiKey.isNotEmpty()){ //如果api过热且config有额外apikey，则使用额外apikey重试
+            run breaking@{
+                Config.extendApiKey.forEach {
+                    url = "https://api.mozambiquehe.re/predator?auth=$it"
+                    requestStr = getRes(url)
+                    if (requestStr.first == 0) return@breaking //如果返回正确信息则跳出循环
+                }
+            }
+        }
+    }
+    if (requestStr.first == 1) { //如果还是不行就报错返回
         RankLookUp.logger.error(requestStr.second)
         return requestStr.second
     }
@@ -23,7 +34,6 @@ fun predatorStat(image: ApexImage):String?{
     else{
         predatorTextMode(res)
     }
-
 }
 
 fun predatorPictureMode(res:ApexResponsePredator, image:ApexImage){

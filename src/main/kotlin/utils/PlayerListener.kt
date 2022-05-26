@@ -21,8 +21,19 @@ suspend fun playerStatListener(): TimerTask{
     listendPlayer.data.forEach { //遍历玩家id创建分数缓存
         if (it.key == "0") return@forEach //跳过占位符
         delay(2000) //延迟2秒防止api过热
-        val url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=${it.key}&auth=${Config.ApiKey}"
-        val requestStr = getRes(url)
+        var url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=${it.key}&auth=${Config.apiKey}"
+        var requestStr = getRes(url)
+        if (requestStr.first == 1) {
+            if(Config.extendApiKey.isNotEmpty()){ //如果api过热且config有额外apikey，则使用额外apikey重试
+                run breaking@{
+                    Config.extendApiKey.forEach { ex_api ->
+                        url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=${it.key}&auth=$ex_api"
+                        requestStr = getRes(url)
+                        if (requestStr.first == 0) return@breaking
+                    }
+                }
+            }
+        }
         val firstRes = Gson().fromJson(requestStr.second, ApexResponsePlayer::class.java)
         val cache = File("$dataFolder/score/listened_${it.key}.score") //缓存文件，保存玩家分数
         if (!cache.exists()) {
@@ -36,9 +47,20 @@ suspend fun playerStatListener(): TimerTask{
                 if (it_id.key == "0") return@forEach //跳过占位符
                 Thread.sleep(2000) //延迟2秒防止api过热
                 GlobalScope.launch { //每个id开一个协程
-                    val url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=${it_id.key}&auth=${Config.ApiKey}"
+                    var url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=${it_id.key}&auth=${Config.apiKey}"
                     val cache = File("$dataFolder/score/listened_${it_id.key}.score")
-                    val requestStr = getRes(url)
+                    var requestStr = getRes(url)
+                    if (requestStr.first == 1) {
+                        if(Config.extendApiKey.isNotEmpty()){ //如果api过热且config有额外apikey，则使用额外apikey重试
+                            run breaking@{
+                                Config.extendApiKey.forEach { ex_api ->
+                                    url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=${it_id.key}&auth=$ex_api"
+                                    requestStr = getRes(url)
+                                    if (requestStr.first == 0) return@breaking
+                                }
+                            }
+                        }
+                    }
                     if(requestStr.first == 1){
                         logger.error("本次对${it_id.key}监听错误，原因：${requestStr.second}")
                         this.cancel()

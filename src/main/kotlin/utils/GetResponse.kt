@@ -40,6 +40,6 @@ fun getRes(url: String):Pair<Int,String?>{
         410 -> Pair(1, "未知平台")
         429 -> Pair(1, "API过热，请稍后再试")
         500 -> Pair(1, "API服务器内部错误")
-        else -> Pair(1, "")
+        else -> Pair(1, "未知错误")
     }
 }

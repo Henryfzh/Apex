@@ -6,16 +6,27 @@ import java.awt.image.BufferedImage
 
 
 fun playerStat(playerid: String,image: ApexImage): String?{
-    if(Config.ApiKey == "") {
+    if(Config.apiKey == "") {
         return "未填写ApiKey"
     }
     var id = playerid
     if("@@" in playerid){
         id = playerid.replace("@@", "%20")
     }
-    val url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=$id&auth=${Config.ApiKey}"
-    val requestStr = getRes(url)
+    var url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=$id&auth=${Config.apiKey}"
+    var requestStr = getRes(url)
     if (requestStr.first == 1) {
+        if(Config.extendApiKey.isNotEmpty()){ //如果api过热且config有额外apikey，则使用额外apikey重试
+            run breaking@{
+                Config.extendApiKey.forEach {
+                    url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=$id&auth=$it"
+                    requestStr = getRes(url)
+                    if (requestStr.first == 0) return@breaking
+                }
+            }
+        }
+    }
+    if(requestStr.first == 1){ //如果还是不行就报错返回
         RankLookUp.logger.error(requestStr.second)
         return requestStr.second
     }

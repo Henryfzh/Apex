@@ -2,6 +2,7 @@ package pers.shennoter
 
 import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
@@ -15,8 +16,22 @@ import java.util.*
 fun mapReminder() :TimerTask{
     val groups: GroupReminding =
         Gson().fromJson(File("${RankLookUp.dataFolder}/Reminder.json").readText(), GroupReminding::class.java)
-    val url = "https://api.mozambiquehe.re/maprotation?version=2&auth=${Config.ApiKey}"
+    var url = "https://api.mozambiquehe.re/maprotation?version=2&auth=${Config.apiKey}"
     var requestStr = getRes(url) //获取第一次地图信息
+    if (requestStr.first == 1) {
+        if(Config.extendApiKey.isNotEmpty()){ //如果api过热且config有额外apikey，则使用额外apikey重试
+            run breaking@{
+                Config.extendApiKey.forEach { ex_api ->
+                    url = "https://api.mozambiquehe.re/maprotation?version=2&auth=$ex_api"
+                    requestStr = getRes(url)
+                    if (requestStr.first == 0) return@breaking
+                }
+            }
+        }
+    }
+    if(requestStr.first == 1) {
+        RankLookUp.logger.error("本次地图轮换监听错误，原因：${requestStr.second}")
+    }
     var res = Gson().fromJson(requestStr.second, ApexResponseMap::class.java)
     val cache = File("${RankLookUp.dataFolder}/map.time")
     if(!cache.exists()) {
@@ -30,12 +45,27 @@ fun mapReminder() :TimerTask{
     var firstStart = true //第一次启动标志
     val mapTask: TimerTask = object : TimerTask() {
         override fun run() {
-            res = Gson().fromJson(getRes(url).second, ApexResponseMap::class.java)
+            requestStr = getRes(url)
+            if (requestStr.first == 1) {
+                if(Config.extendApiKey.isNotEmpty()){ //如果api过热且config有额外apikey，则使用额外apikey重试
+                    run breaking@{
+                        Config.extendApiKey.forEach { ex_api ->
+                            url = "https://api.mozambiquehe.re/maprotation?version=2&auth=$ex_api"
+                            requestStr = getRes(url)
+                            if (requestStr.first == 0) return@breaking
+                        }
+                    }
+                }
+            }
+            if (requestStr.first == 1) {
+                RankLookUp.logger.error("本次地图轮换监听错误，原因：${requestStr.second}")
+            }
+            res = Gson().fromJson(requestStr.second, ApexResponseMap::class.java)
             val storedEndTime = cache.readText().toLong()//通过对比map.time文件判断是否已在提醒计划中
             val endTime = res.battle_royale.current.end.toLong()
             val currentTime = System.currentTimeMillis() / 1000
             val timeToRemind = (endTime - currentTime) * 1000 + 5000 //算出下次轮换还要多久，再加上五秒防止api没及时更新
-            if (endTime != storedEndTime || firstStart) { //若未启动提醒计时则加入计时；如果是第一次启动则忽略一次判断条件，直接开始计时
+            if ((endTime != storedEndTime) || firstStart) { //若未启动提醒计时则加入计时；如果是第一次启动则忽略一次判断条件，直接开始计时
                 cache.writeText(endTime.toString())
                 GlobalScope.launch {
                     delay(timeToRemind)//计时到轮换时间进行提醒

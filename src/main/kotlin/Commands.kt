@@ -7,6 +7,7 @@ import net.mamoe.mirai.contact.Contact.Companion.sendImage
 import pers.shennoter.*
 import pers.shennoter.RankLookUp.dataFolder
 import pers.shennoter.RankLookUp.logger
+import utils.getRes
 import java.io.File
 import java.net.URL
 
@@ -165,13 +166,22 @@ object Listener : CompositeCommand(
 ) {
     @SubCommand
     suspend fun CommandSender.id(id: String) {
-        val url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=$id&auth=${Config.ApiKey}"
-        try {
-            URL(url).readText()
+        var url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=$id&auth=${Config.apiKey}"
+        var res = getRes(url)
+        if (res.first == 1) {
+            if(Config.extendApiKey.isNotEmpty()){ //如果api过热且config有额外apikey，则使用额外apikey重试
+                run breaking@{
+                    Config.extendApiKey.forEach {
+                        url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=$id&auth=$it"
+                        res = getRes(url)
+                        if (res.first == 0) return@breaking
+                    }
+                }
+            }
         }
-        catch(e:Exception){
-            subject?.sendMessage("玩家ID不存在")
-            logger.error("玩家ID不存在")
+        if(res.first == 1){ //如果还是不行就报错返回
+            subject?.sendMessage(res.second!!)
+            logger.error(res.second)
             return
         }
         val gson = Gson()

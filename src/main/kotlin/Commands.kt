@@ -29,11 +29,11 @@ object Player : SimpleCommand(
                     RankLookUp.logger.info(code)
                 } else {
                     RankLookUp.logger.error(code)
-                    subject?.sendMessage(code)
+                    subject?.sendMessage(code!!)
                 }
             }
             "text"->{
-                subject?.sendMessage(code)
+                subject?.sendMessage(code!!)
             }
             else -> subject?.sendMessage("config.yml配置错误，请检查")
         }
@@ -59,11 +59,11 @@ object Map : SimpleCommand(
                     RankLookUp.logger.info(code)
                 } else {
                     RankLookUp.logger.error(code)
-                    subject?.sendMessage(code)
+                    subject?.sendMessage(code!!)
                 }
             }
             "text"->{
-                subject?.sendMessage(code)
+                subject?.sendMessage(code!!)
             }
             else -> subject?.sendMessage("config.yml配置错误，请检查")
         }
@@ -88,7 +88,7 @@ object Craft : SimpleCommand(
         }
         else {
             RankLookUp.logger.error(code)
-            subject?.sendMessage(code)
+            subject?.sendMessage(code!!)
         }
     }
 }
@@ -112,11 +112,11 @@ object Predator : SimpleCommand(
                     RankLookUp.logger.info(code)
                 } else {
                     RankLookUp.logger.error(code)
-                    subject?.sendMessage(code)
+                    subject?.sendMessage(code!!)
                 }
             }
             "text"->{
-                subject?.sendMessage(code)
+                subject?.sendMessage(code!!)
             }
             else -> subject?.sendMessage("config.yml配置错误，请检查")
         }
@@ -138,7 +138,7 @@ object News : SimpleCommand(
         else {
             try {
                 subject?.sendImage(image.get())
-                subject?.sendMessage(code)
+                subject?.sendMessage(code!!)
             } catch (e: Exception) {
                 RankLookUp.logger.error("查询出错")
                 subject?.sendMessage("查询出错")

@@ -3,6 +3,7 @@ package pers.shennoter
 import ApexResponsePlayer
 import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
@@ -11,34 +12,38 @@ import pers.shennoter.RankLookUp.dataFolder
 import pers.shennoter.RankLookUp.logger
 import playerPicturMode
 import playerTextMode
+import utils.getRes
 import java.io.File
-import java.net.URL
 import java.util.*
 
-suspend fun playerStatListener(): TimerTask? {
+suspend fun playerStatListener(): TimerTask{
     val listendPlayer: ListendPlayer = Gson().fromJson(File("$dataFolder/Data.json").readText(), ListendPlayer::class.java)
     listendPlayer.data.forEach { //遍历玩家id创建分数缓存
         if (it.key == "0") return@forEach //跳过占位符
         delay(2000) //延迟2秒防止api过热
         val url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=${it.key}&auth=${Config.ApiKey}"
-        val requestStr = URL(url).readText()
-        val firstRes = Gson().fromJson(requestStr, ApexResponsePlayer::class.java)
+        val requestStr = getRes(url)
+        val firstRes = Gson().fromJson(requestStr.second, ApexResponsePlayer::class.java)
         val cache = File("$dataFolder/score/listened_${it.key}.score") //缓存文件，保存玩家分数
         if (!cache.exists()) {
             cache.createNewFile()
         }
         cache.writeText(firstRes.global.rank.rankScore) //将首次获取到的分数写入缓存文件
     }
-    delay(2000)
     val playerTask : TimerTask = object :TimerTask() { //定时任务
         override fun run() {
             listendPlayer.data.forEach { it_id -> //遍历玩家id
                 if (it_id.key == "0") return@forEach //跳过占位符
-                GlobalScope.launch {  //每个id开一个协程
-                    delay(2000) //延迟2秒防止api过热
+                Thread.sleep(2000) //延迟2秒防止api过热
+                GlobalScope.launch { //每个id开一个协程
                     val url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=${it_id.key}&auth=${Config.ApiKey}"
                     val cache = File("$dataFolder/score/listened_${it_id.key}.score")
-                    val res = Gson().fromJson(URL(url).readText(), ApexResponsePlayer::class.java)
+                    val requestStr = getRes(url)
+                    if(requestStr.first == 1){
+                        logger.error("本次对${it_id.key}监听错误，原因：${requestStr.second}")
+                        this.cancel()
+                    }
+                    val res = Gson().fromJson(requestStr.second, ApexResponsePlayer::class.java)
                     if (res.global.rank.rankScore != cache.readText()) { //如果分数变化
                         if (Config.mode == "pic") { //图片模式
                             val image = ApexImage()

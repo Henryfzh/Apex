@@ -1,31 +1,29 @@
 import com.google.gson.Gson
 import pers.shennoter.*
+import utils.getRes
 import java.awt.Color
 import java.awt.image.BufferedImage
-import java.net.URL
 
-fun predatorStat(image: ApexImage):String{
+
+fun predatorStat(image: ApexImage):String?{
     if(Config.ApiKey == "") {
         return "未填写ApiKey"
     }
-    var requestStr: String
-    var code = "查询成功"
-    try {
-        val url = "https://api.mozambiquehe.re/predator?auth=${Config.ApiKey}"
-        requestStr = URL(url).readText()
-    }catch (e:Exception){
-        code = "错误，短时间内请求过多,请稍后再试"
-        RankLookUp.logger.error(code)
-        return code
+    val url = "https://api.mozambiquehe.re/predator?auth=${Config.ApiKey}"
+    val requestStr = getRes(url)
+    if (requestStr.first == 1) {
+        RankLookUp.logger.error(requestStr.second)
+        return requestStr.second
     }
-    val res = Gson().fromJson(requestStr, ApexResponsePredator::class.java)
-    if (Config.mode == "pic"){
+    val res = Gson().fromJson(requestStr.second, ApexResponsePredator::class.java)
+    return if (Config.mode == "pic"){
         predatorPictureMode(res, image)
+        "查询成功"
     }
     else{
-        code = predatorTextMode(res)
+        predatorTextMode(res)
     }
-    return code
+
 }
 
 fun predatorPictureMode(res:ApexResponsePredator, image:ApexImage){

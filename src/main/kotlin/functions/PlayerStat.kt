@@ -1,47 +1,40 @@
 import com.google.gson.Gson
 import pers.shennoter.*
+import utils.getRes
 import java.awt.*
 import java.awt.image.BufferedImage
-import java.io.FileNotFoundException
-import java.net.URL
 
-fun playerStat(playerid: String,image: ApexImage): String{
+
+fun playerStat(playerid: String,image: ApexImage): String?{
     if(Config.ApiKey == "") {
         return "未填写ApiKey"
     }
-    var requestStr: String
     var id = playerid
     if("@@" in playerid){
         id = playerid.replace("@@", "%20")
     }
-    var code = "查询成功"
-    try {
-        val url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=$id&auth=${Config.ApiKey}"
-        requestStr = URL(url).readText()
-
-    }catch(e: FileNotFoundException){
-        code = "查询出错：Player exists but has never played Apex Legends"
-        RankLookUp.logger.error(code)
-        return code
-    }catch (e:Exception){
-        code = "错误，短时间内请求过多,请稍后再试"
-        RankLookUp.logger.error(code)
-        return code
+    val url = "https://api.mozambiquehe.re/bridge?version=5&platform=PC&player=$id&auth=${Config.ApiKey}"
+    val requestStr = getRes(url)
+    if (requestStr.first == 1) {
+        RankLookUp.logger.error(requestStr.second)
+        return requestStr.second
     }
-    if (requestStr.contains("Error")){
+    /*
+    if (requestStr.second?.contains("Error") == true){
         var errorInfo: String
-        val res = Gson().fromJson(requestStr, ApexResponseError::class.java)
+        val res = Gson().fromJson(requestStr.second, ApexResponseError::class.java)
         errorInfo = "查询出错：" + res.Error
         return errorInfo
     }
-    val res = Gson().fromJson(requestStr, ApexResponsePlayer::class.java)
-    if (Config.mode == "pic"){
+     */
+    val res = Gson().fromJson(requestStr.second, ApexResponsePlayer::class.java)
+    return if(Config.mode == "pic"){
         playerPicturMode(res,playerid,image)
+        "查询成功"
     }
     else{
-        code = playerTextMode(res,playerid)
+        playerTextMode(res,playerid)
     }
-    return code
 }
 
 fun playerPicturMode(res:ApexResponsePlayer,playerid : String,image : ApexImage){

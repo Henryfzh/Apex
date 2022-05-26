@@ -66,7 +66,7 @@ object RankLookUp : KotlinPlugin(
         if(Config.ApiKey == ""){
             logger.error("未找到ApiKey，请到 https://apexlegendsapi.com/ 获取ApiKey填入 ./config/pers.shennoter.RankLookUp/config.yml 中并重启mirai-console")
         }
-        if(Config.cacheAutoDel == "true"){
+        if(Config.cacheAutoDel){
             RankLookUp.logger.info(removeCache(true))
         }
         GlobalScope.launch { //启动监听任务

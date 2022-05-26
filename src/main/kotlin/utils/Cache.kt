@@ -5,12 +5,11 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-fun removeCache(isAuto: Boolean):String{
+fun removeCache(isAuto: Boolean): String {
     val imgs = File("$dataFolder/imgs")
     val score = File("$dataFolder/score")
-    var info = removeFileByTime(isAuto,imgs)
-    info = removeFileByTime(isAuto,score)
-    return info
+    removeFileByTime(isAuto, imgs)
+    return removeFileByTime(isAuto, score)
 }
 
 

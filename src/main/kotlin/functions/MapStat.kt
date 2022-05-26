@@ -1,32 +1,28 @@
 package pers.shennoter
 
 import com.google.gson.Gson
+import utils.getRes
 import java.awt.Color
 import java.awt.image.BufferedImage
-import java.net.URL
 
-fun mapStat(image: ApexImage):String{
+fun mapStat(image: ApexImage):String?{
     if(Config.ApiKey == "") {
         return "未填写ApiKey"
     }
-    var requestStr = ""
-    var code = "查询成功"
     val url = "https://api.mozambiquehe.re/maprotation?version=2&auth=${Config.ApiKey}"
-    try {
-        requestStr = URL(url).readText()
-    }catch (e:Exception){
-        code = "错误，短时间内请求过多,请稍后再试"
-        RankLookUp.logger.error(code)
-        return code
+    var requestStr = getRes(url)
+    if (requestStr.first == 1) {
+        RankLookUp.logger.error(requestStr.second)
+        return requestStr.second
     }
-    val res = Gson().fromJson(requestStr, ApexResponseMap::class.java)
-    if (Config.mode == "pic"){
+    val res = Gson().fromJson(requestStr.second, ApexResponseMap::class.java)
+    return if (Config.mode == "pic"){
         mapPictureMode(res, image)
+        "查询成功"
     }
     else{
-        code = mapTextMode(res)
+        mapTextMode(res)
     }
-    return code
 }
 
 fun mapPictureMode(res: ApexResponseMap, image: ApexImage){

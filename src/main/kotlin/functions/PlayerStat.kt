@@ -19,14 +19,6 @@ fun playerStat(playerid: String,image: ApexImage): String?{
         RankLookUp.logger.error(requestStr.second)
         return requestStr.second
     }
-    /*
-    if (requestStr.second?.contains("Error") == true){
-        var errorInfo: String
-        val res = Gson().fromJson(requestStr.second, ApexResponseError::class.java)
-        errorInfo = "查询出错：" + res.Error
-        return errorInfo
-    }
-     */
     val res = Gson().fromJson(requestStr.second, ApexResponsePlayer::class.java)
     return if(Config.mode == "pic"){
         playerPicturMode(res,playerid,image)
